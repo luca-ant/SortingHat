@@ -10,7 +10,7 @@ from threading import Timer
 
 
 from gaze_tracker import GazeTracker
-from screen import Screen
+from screen_quiz import Screen
 from quiz import Quiz
 
 
@@ -27,8 +27,8 @@ SCREEN_HEIGHT = 360
 FRAME_WIDTH = 1280
 FRAME_HEIGHT = 720
 
-TIME_READING = 5
-TIME_ANSWERING = 3
+TIME_READING = 7
+TIME_ANSWERING = 5
 
 mode = Mode.BEGINNING
 
@@ -79,7 +79,7 @@ def main():
         screen.update_frame(dec_frame)
         screen.print_instructions()
 
-        direction = gaze_tracker.get_direction()
+        direction = gaze_tracker.get_looking_direction()
         print("DIRECTION: {}".format(direction))
 
         if direction:
@@ -101,7 +101,7 @@ def main():
             screen.print_question(question)
             screen.print_answers()
 
-            direction = gaze_tracker.get_direction()
+            direction = gaze_tracker.get_looking_direction()
             print("DIRECTION: {}".format(direction))
 
             if direction:

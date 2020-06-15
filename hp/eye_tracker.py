@@ -73,6 +73,7 @@ class EyeTracker():
             self._extract_iris("right")
             if self.right_iris_detected:
                 self._extract_purkinje("right")
+
         self._extract_looking_direction()
 
 
@@ -89,7 +90,6 @@ class EyeTracker():
 
     def get_looking_direction(self):
         return self.looking_direction
-
 
 
     def decorate_frame(self):
@@ -567,15 +567,15 @@ class EyeTracker():
         directionR = None
         directionL = None
 
-        if self.left_eye_detected:
+        if self.left_eye_detected and self.left_pupil:
             w = self.left_eye_frame.shape[1]
             if self.left_pupil[0] < 0.5 * w:
                 directionL = "right"
-            if self.left_eye_pupil[0] > 0.5 * w:
+            if self.left_pupil[0] > 0.5 * w:
                 directionL = "left"
             direction = directionL
 
-        if self.right_eye_detected:
+        if self.right_eye_detected and self.right_pupil:
             w = self.right_eye_frame.shape[1]
             if self.right_pupil[0] < 0.5 * w:
                 directionR = "right"
