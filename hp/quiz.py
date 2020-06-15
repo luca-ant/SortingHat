@@ -14,15 +14,26 @@ class Quiz:
     def __init__(self):
         self.questions = {}
         self.answers = {}
-        self.output = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
+        self.results = {"Gryffindor": 4, "Hufflepuff": 5, "Ravenclaw": 0, "Slytherin": 0 }
         self.load_questions()
 
 
     def load_questions(self):
         self.questions = {
-                        0 : "Prima\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nasdasdadadasd\n",
-                        1 : "Seconda",
-                        2 : "Terza"
+                        0 : "Would you play\nQuidditch at Hogwarts?",
+                        1 : "Would you excell in Defense\nAgainst the Dark Arts?",
+                        2 : "Are you good at\nplaying Wizard's Chess?",
+                        3 : "You catch a classmate cheating\non their exams. Do you tell them?",
+                        4 : "Would you ever receive a\nHowler from your parents?",
+                        5 : "Would you have a pet\nwhile at Hogwarts?",
+                        6 : "Would you ever go exploring\nin the Forbidden Forest?",
+                        7 : "Would you ever want to work\nat the Ministry of Magic?",
+                        8 : "Whould you want to have\nthe Elder Wand?",
+                        9 : "Would you ever go snooping in the\nforbidden section of the library?",
+                        10 : "Is Moaning Myrtle annoying?",
+                        11 : "Would you ever participate in a duel?",
+                        12 : "Is Harry actually a good wizard?",
+                        13 : "Do you prefer the books over the movies?"
                     }
 
         l = list(self.questions.items())
@@ -47,7 +58,8 @@ class Quiz:
 
     def compute_result(self):
 
-        return self.output[0]
+
+        return max(self.results, key=self.results.get)
 
 
 

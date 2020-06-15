@@ -30,6 +30,9 @@ FRAME_HEIGHT = 720
 TIME_READING = 7
 TIME_ANSWERING = 5
 
+TIME_READING = 0.5
+TIME_ANSWERING = 0.5
+
 mode = Mode.BEGINNING
 
 def timeout_reading():
