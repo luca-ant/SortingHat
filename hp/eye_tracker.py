@@ -48,6 +48,7 @@ class EyeTracker():
         self.left_purkinje = None
         self.right_purkinje = None
 
+        self.looking_direction = None
 
     def update(self, frame):
         self.frame = frame
@@ -72,6 +73,7 @@ class EyeTracker():
             self._extract_iris("right")
             if self.right_iris_detected:
                 self._extract_purkinje("right")
+        self._extract_looking_direction()
 
 
     def left_eye(self):
@@ -83,6 +85,12 @@ class EyeTracker():
         if self.right_eye_detected:
             return Eye(self.right_eye_frame.copy(), "right", self.right_pupil, self.right_pupil_radius, self.right_iris_radius, self.right_purkinje)
         return None
+
+
+    def get_looking_direction(self):
+        return self.looking_direction
+
+
 
     def decorate_frame(self):
         frame = self.frame.copy()
@@ -551,3 +559,35 @@ class EyeTracker():
         if position == "right":
             self.right_purkinje = purkinje
 
+
+
+
+    def _extract_looking_direction(self):
+        direction = None
+        directionR = None
+        directionL = None
+
+        if self.left_eye_detected:
+            w = self.left_eye_frame.shape[1]
+            if self.left_pupil[0] < 0.5 * w:
+                directionL = "right"
+            if self.left_eye_pupil[0] > 0.5 * w:
+                directionL = "left"
+            direction = directionL
+
+        if self.right_eye_detected:
+            w = self.right_eye_frame.shape[1]
+            if self.right_pupil[0] < 0.5 * w:
+                directionR = "right"
+            if self.right_pupil[0] > 0.5 * w:
+                directionR = "left"
+            direction = directionR
+
+        print(directionL, directionR)
+
+        if directionL == directionR:
+            direction = directionL
+        else:
+            direction = None
+
+        self.looking_direction = direction
