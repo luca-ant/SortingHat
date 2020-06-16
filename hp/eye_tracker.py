@@ -2,7 +2,7 @@ import os
 import cv2
 import math
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from model import Eye
 
 class EyeTracker():
