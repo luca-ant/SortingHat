@@ -76,7 +76,7 @@ class Screen:
         fs = 2
         th = 3
 
-        answer = 'Look left\nfor YES'
+        answer = 'Look here\nfor YES'
 
         for i, line in enumerate(answer.split('\n')):
             textsize = cv2.getTextSize(line, font, fs, th)[0]
@@ -85,7 +85,7 @@ class Screen:
             y = y0 + i*dy
             cv2.putText(img=self.screen, text=line, org=(x, y),fontFace=font, fontScale=fs, color=(0,0,0), thickness=th)
 
-        answer = 'Look right\nfor NO'
+        answer = 'Look here\nfor NO'
 
         for i, line in enumerate(answer.split('\n')):
             textsize = cv2.getTextSize(line, font, fs, th)[0]
@@ -160,8 +160,8 @@ class Screen:
 
     def show(self):
         cv2.namedWindow("screen")
-#        cv2.moveWindow("screen", int(960 - self.width/2), 0)
-        cv2.moveWindow("screen", 0, 0)
+        cv2.moveWindow("screen", int(960 - self.width/2), 0)
+#        cv2.moveWindow("screen", 0, 0)
 
 #        cv2.namedWindow("screen", cv2.WND_PROP_FULLSCREEN)
 #        cv2.setWindowProperty("screen",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)

@@ -9,8 +9,8 @@ from enum import Enum
 from threading import Timer
 
 
-from gaze_tracker import GazeTracker
-from screen_quiz import Screen
+from eye_tracker import EyeTracker
+from screen import Screen
 from quiz import Quiz
 
 
@@ -30,8 +30,8 @@ FRAME_HEIGHT = 720
 TIME_READING = 7
 TIME_ANSWERING = 5
 
-TIME_READING = 0.5
-TIME_ANSWERING = 0.5
+#TIME_READING = 0.5
+#TIME_ANSWERING = 0.5
 
 mode = Mode.BEGINNING
 
@@ -56,7 +56,7 @@ def main():
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
 
-    gaze_tracker = GazeTracker()
+    eye_tracker = EyeTracker()
     screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     screen.clean()
@@ -70,19 +70,20 @@ def main():
 
         _, frame = camera.read() 
         start = time.time()
-        gaze_tracker.update(frame)
+        eye_tracker.update(frame)
         end = time.time()
         print("TIME: {:.3f} ms".format(end*1000 - start*1000))
 
-        dec_frame = gaze_tracker.eye_tracker.decorate_frame()
+        dec_frame = eye_tracker.decorate_frame()
         cv2.namedWindow("frame")
+        cv2.moveWindow("frame", int(960 - FRAME_WIDTH/2), screen.height + 70)
         cv2.imshow('frame', dec_frame)
 
         screen.clean()
         screen.update_frame(dec_frame)
         screen.print_instructions()
 
-        direction = gaze_tracker.get_looking_direction()
+        direction = eye_tracker.get_looking_direction()
         print("DIRECTION: {}".format(direction))
 
         if direction:
@@ -104,7 +105,7 @@ def main():
             screen.print_question(question)
             screen.print_answers()
 
-            direction = gaze_tracker.get_looking_direction()
+            direction = eye_tracker.get_looking_direction()
             print("DIRECTION: {}".format(direction))
 
             if direction:
