@@ -284,22 +284,47 @@ class EyeTracker():
             eye_frame_gray = self.frame_gray[self.right_eye_bb[1]:self.right_eye_bb[1]+self.right_eye_bb[3], self.right_eye_bb[0]:self.right_eye_bb[0]+self.right_eye_bb[2]]
 
         eye_frame_gray = cv2.GaussianBlur(eye_frame_gray, (7, 7), 0)
-#        eye_frame_gray = cv2.medianBlur(eye_frame_gray, 7)
+        eye_frame_gray = cv2.medianBlur(eye_frame_gray, 7)
         eye_frame_gray = cv2.equalizeHist(eye_frame_gray)
 
         eye_frame_gray = cv2.erode(eye_frame_gray, None, iterations=2)
         eye_frame_gray = cv2.dilate(eye_frame_gray, None, iterations=4)
 
-        eye_frame_gray = cv2.medianBlur(eye_frame_gray, 7)
-        if position == "left":
-            cv2.imshow('pupil', eye_frame_gray)
+        threshold = 25
+        threshold = cv2.getTrackbarPos('threshold', 'screen')
 
-        keypoints = self.blob_detector.detect(eye_frame_gray)
+        _, eye_frame_th = cv2.threshold(eye_frame_gray, threshold, 255, cv2.THRESH_BINARY)
 
-        if len(keypoints) > 0:
+        eye_frame_th = cv2.medianBlur(eye_frame_th, 7)
 
-            pupil_center = (int(keypoints[0].pt[0]), int(keypoints[0].pt[1]))
-            pupil_radius = int(keypoints[0].size / 2)
+#        if position == "right":
+#            cv2.imshow('pupil', eye_frame_th)
+
+        contours, _ = cv2.findContours(eye_frame_th, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
+        
+        for cnt in contours:
+
+            cnt = cv2.convexHull(cnt)
+            area = cv2.contourArea(cnt)
+            circumference = cv2.arcLength(cnt, True)
+            circularity = circumference ** 2 / (4*math.pi*area)
+
+            if circularity < 0.3 and circularity > 1.7:
+                continue
+
+            (x,y), radius = cv2.minEnclosingCircle(cnt)
+            pupil_center = (int(x),int(y))
+            pupil_radius = int(radius)
+            m = cv2.moments(cnt)
+#            if m['m00'] != 0:
+#                pupil_center = (int(m['m10'] / m['m00']), int(m['m01'] / m['m00']))
+
+
+#        keypoints = self.blob_detector.detect(eye_frame_th)
+#        if len(keypoints) > 0:
+#            pupil_center = (int(keypoints[0].pt[0]), int(keypoints[0].pt[1]))
+#            pupil_radius = int(keypoints[0].size / 2)
 
 
         if position == "left":
@@ -309,7 +334,7 @@ class EyeTracker():
         if position == "right":
             self.right_pupil = pupil_center
             self.right_pupil_radius = pupil_radius
-            self.right_eye_frame = cv2.drawKeypoints(self.right_eye_frame, keypoints, self.right_eye_frame, (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+#            self.right_eye_frame = cv2.drawKeypoints(self.right_eye_frame, keypoints, self.right_eye_frame, (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
 
     def _extract_iris(self, position):
@@ -558,23 +583,27 @@ class EyeTracker():
 
         if self.left_eye_detected and self.left_pupil:
             w = self.left_eye_frame.shape[1]
-            if self.left_pupil[0] < 0.5 * w:
+            if self.left_pupil[0] < 0.45 * w:
                 directionL = "right"
-            if self.left_pupil[0] > 0.5 * w:
+            if self.left_pupil[0] > 0.55 * w:
                 directionL = "left"
             direction = directionL
 
         if self.right_eye_detected and self.right_pupil:
             w = self.right_eye_frame.shape[1]
-            if self.right_pupil[0] < 0.5 * w:
+            if self.right_pupil[0] < 0.45 * w:
                 directionR = "right"
-            if self.right_pupil[0] > 0.5 * w:
+            if self.right_pupil[0] > 0.55 * w:
                 directionR = "left"
             direction = directionR
 
         print(directionL, directionR)
 
         if directionL == directionR:
+            direction = directionL
+        elif directionL == None and directionR:
+            direction = directionR
+        elif directionR == None and directionL:
             direction = directionL
         else:
             direction = None

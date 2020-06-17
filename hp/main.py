@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 from enum import Enum
 from threading import Timer
-
+import pyautogui
 
 from eye_tracker import EyeTracker
 from screen import Screen
@@ -21,6 +21,9 @@ class Mode(Enum):
     BEGINNING = 3
     COMPLETED = 4
 
+RES_SCREEN = pyautogui.size() # RES_SCREEN[0] -> width
+                              # RES_SCREEN[1] -> heigth
+
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 360
 
@@ -29,6 +32,7 @@ FRAME_HEIGHT = 720
 
 TIME_READING = 7
 TIME_ANSWERING = 5
+
 
 #TIME_READING = 0.5
 #TIME_ANSWERING = 0.5
@@ -47,6 +51,11 @@ def timeout_answering():
     mode = Mode.AWAITING
     return
 
+
+def nothing():
+    pass
+
+
 def main():
     global mode
     url = "http://192.168.1.2:8080" # Your url might be different, check the app
@@ -64,6 +73,9 @@ def main():
     screen.show()
 
     quiz = None
+    cv2.namedWindow("screen")
+    cv2.createTrackbar('threshold', 'screen', 0, 255, nothing)
+    cv2.setTrackbarPos('threshold', 'screen', 25)
 
     while True:
         print(mode)
@@ -76,7 +88,7 @@ def main():
 
         dec_frame = eye_tracker.decorate_frame()
         cv2.namedWindow("frame")
-        cv2.moveWindow("frame", int(960 - FRAME_WIDTH/2), screen.height + 70)
+        cv2.moveWindow("frame", int(RES_SCREEN[0] / 2 - FRAME_WIDTH / 2), screen.height + 100)
         cv2.imshow('frame', dec_frame)
 
         screen.clean()
