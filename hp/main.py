@@ -87,9 +87,12 @@ def main():
         print("TIME: {:.3f} ms".format(end*1000 - start*1000))
 
         dec_frame = eye_tracker.decorate_frame()
+        dec_frame = cv2.resize(dec_frame,(int(FRAME_WIDTH / 1.5), int(FRAME_HEIGHT / 1.5)))
+
         cv2.namedWindow("frame")
-        cv2.moveWindow("frame", int(RES_SCREEN[0] / 2 - FRAME_WIDTH / 2), screen.height + 100)
+        cv2.moveWindow("frame", int(RES_SCREEN[0] / 2 - FRAME_WIDTH / 3), screen.height + 100)
         cv2.imshow('frame', dec_frame)
+
 
         screen.clean()
         screen.update_frame(dec_frame)
