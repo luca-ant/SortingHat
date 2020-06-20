@@ -39,7 +39,7 @@ class EyeTracker():
         detector_params.maxInertiaRatio = 1.5
 
         # Blob detector
-        self.blob_detector = cv2.SimpleBlobDetector_create(detector_params)
+#        self.blob_detector = cv2.SimpleBlobDetector_create(detector_params)
 
         self.frame = None
         self.frame_gray = None
@@ -283,26 +283,26 @@ class EyeTracker():
 #            eye_frame_gray = cv2.cvtColor(self.right_eye_frame, cv2.COLOR_BGR2GRAY) 
             eye_frame_gray = self.frame_gray[self.right_eye_bb[1]:self.right_eye_bb[1]+self.right_eye_bb[3], self.right_eye_bb[0]:self.right_eye_bb[0]+self.right_eye_bb[2]]
 
-        eye_frame_gray = cv2.GaussianBlur(eye_frame_gray, (7, 7), 0)
-        eye_frame_gray = cv2.medianBlur(eye_frame_gray, 7)
+#        eye_frame_gray = cv2.GaussianBlur(eye_frame_gray, (7, 7), 0)
+#        eye_frame_gray = cv2.medianBlur(eye_frame_gray, 7)
         eye_frame_gray = cv2.equalizeHist(eye_frame_gray)
 
         eye_frame_gray = cv2.erode(eye_frame_gray, None, iterations=2)
         eye_frame_gray = cv2.dilate(eye_frame_gray, None, iterations=4)
 
-        threshold = 25
+#        threshold = 25
         threshold = cv2.getTrackbarPos('threshold', 'screen')
 
         _, eye_frame_th = cv2.threshold(eye_frame_gray, threshold, 255, cv2.THRESH_BINARY)
 
         eye_frame_th = cv2.medianBlur(eye_frame_th, 7)
 
-#        if position == "right":
-#            cv2.imshow('pupil', eye_frame_th)
+        if position == "right":
+            cv2.imshow('pupil', eye_frame_th)
 
         contours, _ = cv2.findContours(eye_frame_th, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
-        
+
         for cnt in contours:
 
             cnt = cv2.convexHull(cnt)
@@ -310,15 +310,17 @@ class EyeTracker():
             circumference = cv2.arcLength(cnt, True)
             circularity = circumference ** 2 / (4*math.pi*area)
 
-            if circularity < 0.3 and circularity > 1.7:
-                continue
+#            if circularity < 0.5 and circularity > 1.5:
+#                continue
 
-            (x,y), radius = cv2.minEnclosingCircle(cnt)
-            pupil_center = (int(x),int(y))
+#            (x,y), radius = cv2.minEnclosingCircle(cnt)
+#            pupil_center = (int(x),int(y))
+
+            radius = circumference / (2 * math.pi)
             pupil_radius = int(radius)
             m = cv2.moments(cnt)
-#            if m['m00'] != 0:
-#                pupil_center = (int(m['m10'] / m['m00']), int(m['m01'] / m['m00']))
+            if m['m00'] != 0:
+                pupil_center = (int(m['m10'] / m['m00']), int(m['m01'] / m['m00']))
 
 
 #        keypoints = self.blob_detector.detect(eye_frame_th)
@@ -575,7 +577,6 @@ class EyeTracker():
 
 
 
-
     def _extract_looking_direction(self):
         direction = None
         directionR = None
@@ -596,8 +597,6 @@ class EyeTracker():
             if self.right_pupil[0] > 0.55 * w:
                 directionR = "left"
             direction = directionR
-
-        print(directionL, directionR)
 
         if directionL == directionR:
             direction = directionL
