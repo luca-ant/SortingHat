@@ -55,23 +55,6 @@ class Screen:
     def clean(self):
         self.screen = np.ones((self.height, self.width, 3))
 
-#    def update_time(self, progress=0):
-#        x, y = (int)
-#        if progress == 1.0:
-#            cv2.circle(self.screen, (x, y), 5, (0, 255, 0), -1)
-#        else:
-#            cv2.circle(self.screen, (x, y), 5, (0, 0, 0), -1)
-#
-#        if progress > 0:
-#            # Ellipse parameters
-#            radius = 20
-#            axes = (radius, radius)
-#            angle = 0
-#            start_angle = 0
-#            end_angle = 360 * progress
-#            cv2.ellipse(self.screen, (x, y), axes, angle, start_angle, end_angle, (0, 255, 0), 2)
-
-
 
     def print_answers(self):
 
@@ -97,28 +80,12 @@ class Screen:
             y = y0 + i*dy
             cv2.putText(img=self.screen, text=line, org=(x, y),fontFace=font, fontScale=fs, color=(0,0,0), thickness=th)
 
-#        font = cv2.FONT_HERSHEY_SIMPLEX
-#        fs = 5
-#        th = 5
-#
-#        line = 'Look left for YES'
-#        textsize = cv2.getTextSize(line, font, fs, th)[0]
-#        x = (self.width // 2 - textsize[0]) // 2
-#        y = self.height // 3 + ((2 * (self.height // 3) + textsize[1]) // 2)
-#        cv2.putText(img=self.screen, text=line, org=(x, y),fontFace=font, fontScale=fs, color=(0,0,0), thickness=th)
-#
-#        line = 'NO'
-#        textsize = cv2.getTextSize(line, font, fs, th)[0]
-#        x = self.width // 2 + (self.width // 2 - textsize[0]) // 2
-#        y = self.height // 3 + ((2 * (self.height // 3) + textsize[1]) // 2)
-#        cv2.putText(img=self.screen, text=line, org=(x, y),fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=5, color=(0,0,0), thickness=5)
-
 
     def print_question(self, question):
         font = cv2.FONT_HERSHEY_SIMPLEX
         fs = 1
         th = 2
-        
+
         y0, dy = int(0.1 * self.height), 30
 
         for i, line in enumerate(question.split('\n')):
@@ -164,14 +131,10 @@ class Screen:
     def show(self):
         cv2.namedWindow("screen")
         cv2.moveWindow("screen", int(RES_SCREEN[0] / 2 - self.width/2), 0)
-#        cv2.moveWindow("screen", 0, 0)
 
 #        cv2.namedWindow("screen", cv2.WND_PROP_FULLSCREEN)
 #        cv2.setWindowProperty("screen",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
         cv2.imshow("screen", self.screen)
-
-#        to_show = cv2.vconcat([self.screen.astype(np.uint8), self.frame.astype(np.uint8)])
-#        cv2.imshow("screen", to_show)
 
 
 

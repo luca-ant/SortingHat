@@ -14,7 +14,7 @@ class Quiz:
     def __init__(self):
         self.questions = {}
         self.answers = {}
-        self.results = {"Gryffindor": 4, "Hufflepuff": 5, "Ravenclaw": 0, "Slytherin": 0 }
+        self.results = {"Gryffindor": 0, "Hufflepuff": 0, "Ravenclaw": 0, "Slytherin": 0 }
         self.load_questions()
 
 
@@ -33,7 +33,9 @@ class Quiz:
                         10 : "Is Moaning Myrtle annoying?",
                         11 : "Would you ever participate in a duel?",
                         12 : "Is Harry actually a good wizard?",
-                        13 : "Do you prefer the books over the movies?"
+                        13 : "Do you prefer the books over the movies?",
+                        14 : "",
+                        15 : ""
                     }
 
         l = list(self.questions.items())
@@ -43,8 +45,7 @@ class Quiz:
     def add_answer(self, id_q, answer):
         self.answers[id_q] = self.answers.get(id_q, list())
         self.answers[id_q].append(answer)
-        print(self.answers)
-    
+
     def get_answer(self, id_q):
         answers = self.answers.get(id_q, list())
         num_yes = answers.count('yes') 
@@ -55,9 +56,9 @@ class Quiz:
         else:
             return 'no'
 
-
     def compute_result(self):
 
+        self.results = {"Gryffindor": 4, "Hufflepuff": 5, "Ravenclaw": 0, "Slytherin": 0 }
 
         return max(self.results, key=self.results.get)
 

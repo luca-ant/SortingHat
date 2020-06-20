@@ -21,24 +21,25 @@ class EyeTracker():
 #        self.eye_cascade = cv2.CascadeClassifier(os.path.join('classifiers', 'haarcascade_eye.xml'))
         self.eye_cascade = cv2.CascadeClassifier(os.path.join('classifiers', 'haarcascade_eye_tree_eyeglasses.xml'))
 
-        detector_params = cv2.SimpleBlobDetector_Params()
-        # Change thresholds
-        detector_params.minThreshold = 0;
-        detector_params.maxThreshold = 255;
-        # Filter by Area.
-        detector_params.filterByArea = True
-        detector_params.minArea = 200
-        detector_params.maxArea = 500
-        # Filter by Circularity
-        detector_params.filterByCircularity = True
-        detector_params.minCircularity = 0.5
-        detector_params.maxCircularity = 1.5
-        # Filter by Inertia
-        detector_params.filterByInertia = True
-        detector_params.minInertiaRatio = 0.5
-        detector_params.maxInertiaRatio = 1.5
-
-        # Blob detector
+        # FOR BLOB DETECION VERSION
+#        detector_params = cv2.SimpleBlobDetector_Params()
+#        # Change thresholds
+#        detector_params.minThreshold = 0;
+#        detector_params.maxThreshold = 255;
+#        # Filter by Area.
+#        detector_params.filterByArea = True
+#        detector_params.minArea = 200
+#        detector_params.maxArea = 500
+#        # Filter by Circularity
+#        detector_params.filterByCircularity = True
+#        detector_params.minCircularity = 0.5
+#        detector_params.maxCircularity = 1.5
+#        # Filter by Inertia
+#        detector_params.filterByInertia = True
+#        detector_params.minInertiaRatio = 0.5
+#        detector_params.maxInertiaRatio = 1.5
+#
+#        # Blob detector
 #        self.blob_detector = cv2.SimpleBlobDetector_create(detector_params)
 
         self.frame = None
@@ -53,20 +54,12 @@ class EyeTracker():
         self.left_eye_bb = None
         self.right_eye_bb = None
 
+        self.left_pupil_detected = False
+        self.right_pupil_detected = False
         self.left_pupil = None
         self.right_pupil = None
         self.left_pupil_radius = None
         self.right_pupil_radius = None
-
-        self.left_iris_detected = False
-        self.right_iris_detected = False
-        self.left_iris = None
-        self.right_iris = None
-        self.left_iris_radius = None
-        self.right_iris_radius = None
-
-        self.left_purkinje = None
-        self.right_purkinje = None
 
         self.looking_direction = None
 
@@ -84,27 +77,21 @@ class EyeTracker():
         self._extract_eyes()
         if self.left_eye_detected:
             self._extract_pupil("left")
-#            self._extract_iris("left")
-#            if self.left_iris_detected:
-#                self._extract_purkinje("left")
 
         if self.right_eye_detected:
             self._extract_pupil("right")
-#            self._extract_iris("right")
-#            if self.right_iris_detected:
-#                self._extract_purkinje("right")
 
         self._extract_looking_direction()
 
 
     def left_eye(self):
         if self.left_eye_detected:
-            return Eye(self.left_eye_frame.copy(), "left", self.left_pupil, self.left_pupil_radius, self.left_iris_radius, self.left_purkinje)
+            return Eye(self.left_eye_frame.copy(), "left", self.left_pupil, self.left_pupil_radius)
         return None
 
     def right_eye(self):
         if self.right_eye_detected:
-            return Eye(self.right_eye_frame.copy(), "right", self.right_pupil, self.right_pupil_radius, self.right_iris_radius, self.right_purkinje)
+            return Eye(self.right_eye_frame.copy(), "right", self.right_pupil, self.right_pupil_radius)
         return None
 
 
@@ -120,9 +107,6 @@ class EyeTracker():
         cv2.rectangle(frame, (x,y), (x+w,y+h), (255,255,0), 2)
 
         if self.left_eye_bb:
-            # draw the left eye bounding box
-            x, y, w, h = self.left_eye_bb
-            cv2.rectangle(frame, (x,y), (x+w,y+h), (255,0,255), 2)
 
             if self.left_pupil and self.left_pupil_radius:
                 # draw the left pupil
@@ -130,32 +114,16 @@ class EyeTracker():
                 x += self.left_eye_bb[0]
                 y += self.left_eye_bb[1]
                 r = self.left_pupil_radius
-#                r = 2
                 cv2.circle(frame, (x, y), 2, (0, 0, 255), -1)
                 cv2.circle(frame, (x, y), r, (0, 255, 0), 1)
+                eye_frame = frame[self.left_eye_bb[1]:self.left_eye_bb[1]+self.left_eye_bb[3], self.left_eye_bb[0]:self.left_eye_bb[0]+self.left_eye_bb[2]]
+                cv2.imwrite("images/05_eye_frame.png", eye_frame)
 
-#            if self.left_iris and self.left_iris_radius:
-#                # draw the left iris
-#                x, y = self.left_iris
-#                x += self.left_eye_bb[0]
-#                y += self.left_eye_bb[1]
-#                r = self.left_iris_radius
-#                cv2.circle(frame, (x, y), 2, (0, 0, 255), -1)
-#                cv2.circle(frame, (x, y), r, (0, 255, 0), 1)
-
-            if self.left_purkinje:
-                # draw the left purkinje
-                x, y = self.left_purkinje
-                x += self.left_eye_bb[0]
-                y += self.left_eye_bb[1]
-                r = 2
-                cv2.circle(frame, (x, y), r, (255, 0, 0), -1)
-
+            # draw the left eye bounding box
+            x, y, w, h = self.left_eye_bb
+            cv2.rectangle(frame, (x,y), (x+w,y+h), (255,0,255), 2)
 
         if self.right_eye_bb:
-            # draw the right eye bounding box
-            x, y, w, h = self.right_eye_bb
-            cv2.rectangle(frame, (x,y), (x+w,y+h), (255,0,255), 2)
 
             if self.right_pupil and self.right_pupil_radius:
                 # draw the right pupil center
@@ -163,26 +131,12 @@ class EyeTracker():
                 x += self.right_eye_bb[0]
                 y += self.right_eye_bb[1]
                 r = self.right_pupil_radius
-#                r = 2
                 cv2.circle(frame, (x, y), 2, (0, 0, 255), -1)
                 cv2.circle(frame, (x, y), r, (0, 255, 0), 1)
 
-#            if self.right_iris and self.right_iris_radius:
-#                # draw the right iris
-#                x, y = self.right_iris
-#                x += self.right_eye_bb[0]
-#                y += self.right_eye_bb[1]
-#                r = self.right_iris_radius
-#                cv2.circle(frame, (x, y), 2, (0, 0, 255), -1)
-#                cv2.circle(frame, (x, y), r, (0, 255, 0), 1)
-
-            if self.right_purkinje:
-                # draw the right purkinje
-                x, y = self.right_purkinje
-                x += self.right_eye_bb[0]
-                y += self.right_eye_bb[1]
-                r = 2
-                cv2.circle(frame, (x, y), r, (255, 0, 0), -1)
+            # draw the right eye bounding box
+            x, y, w, h = self.right_eye_bb
+            cv2.rectangle(frame, (x,y), (x+w,y+h), (255,0,255), 2)
 
         return frame
 
@@ -245,24 +199,12 @@ class EyeTracker():
                 self.left_eye_bb = (x + left_bb[0], y + left_bb[1], left_bb[2], left_bb[3])
                 self.left_eye_frame = self.frame[self.left_eye_bb[1]:self.left_eye_bb[1]+self.left_eye_bb[3], self.left_eye_bb[0]:self.left_eye_bb[0]+self.left_eye_bb[2]]
 
-#                height = self.left_eye_frame.shape[0]
-#                width = self.left_eye_frame.shape[1]
-#                scale_factor = 2
-#
-#                self.left_eye_frame = cv2.resize(self.left_eye_frame, dsize=(width * scale_factor, height * scale_factor), interpolation=cv2.INTER_CUBIC)
-
             else:
                 self.right_eye_detected = True
                 right_bb = np.array([ex, ey, ew, eh])
                 right_bb += remove_eyebrows
                 self.right_eye_bb = (x + right_bb[0], y + right_bb[1], right_bb[2], right_bb[3])
                 self.right_eye_frame = self.frame[self.right_eye_bb[1]:self.right_eye_bb[1]+self.right_eye_bb[3], self.right_eye_bb[0]:self.right_eye_bb[0]+self.right_eye_bb[2]]
-#                height = self.right_eye_frame.shape[0]
-#                width = self.right_eye_frame.shape[1]
-#                scale_factor = 2
-#
-#                self.right_eye_frame = cv2.resize(self.right_eye_frame, dsize=(width * scale_factor, height * scale_factor), interpolation=cv2.INTER_CUBIC)
-
 
 
     def _extract_pupil(self, position):
@@ -272,33 +214,47 @@ class EyeTracker():
         w.r.t the eye frame and the pupil radius in pixels 
         """
 
+        self.left_pupil_detected = False
+        self.right_pupil_detected = False
         pupil_center = None
         pupil_radius = None
 
         if position == "left":
-#            eye_frame_gray = cv2.cvtColor(self.left_eye_frame, cv2.COLOR_BGR2GRAY) 
             eye_frame_gray = self.frame_gray[self.left_eye_bb[1]:self.left_eye_bb[1]+self.left_eye_bb[3], self.left_eye_bb[0]:self.left_eye_bb[0]+self.left_eye_bb[2]]
 
         if position == "right":
-#            eye_frame_gray = cv2.cvtColor(self.right_eye_frame, cv2.COLOR_BGR2GRAY) 
             eye_frame_gray = self.frame_gray[self.right_eye_bb[1]:self.right_eye_bb[1]+self.right_eye_bb[3], self.right_eye_bb[0]:self.right_eye_bb[0]+self.right_eye_bb[2]]
+
+
+        if position == "left":
+            cv2.imwrite("images/00_eye_frame_gray.png", eye_frame_gray)
+
 
 #        eye_frame_gray = cv2.GaussianBlur(eye_frame_gray, (7, 7), 0)
 #        eye_frame_gray = cv2.medianBlur(eye_frame_gray, 7)
         eye_frame_gray = cv2.equalizeHist(eye_frame_gray)
 
+        if position == "left":
+            cv2.imwrite("images/01_eye_frame_equalized.png", eye_frame_gray)
+
         eye_frame_gray = cv2.erode(eye_frame_gray, None, iterations=2)
         eye_frame_gray = cv2.dilate(eye_frame_gray, None, iterations=4)
 
+        if position == "left":
+            cv2.imwrite("images/02_eye_frame_er-dil.png", eye_frame_gray)
+
 #        threshold = 25
-        threshold = cv2.getTrackbarPos('threshold', 'screen')
+        threshold = cv2.getTrackbarPos('threshold', 'frame')
 
         _, eye_frame_th = cv2.threshold(eye_frame_gray, threshold, 255, cv2.THRESH_BINARY)
 
+        if position == "left":
+            cv2.imwrite("images/03_eye_frame_threshold.png", eye_frame_th)
+
         eye_frame_th = cv2.medianBlur(eye_frame_th, 7)
 
-        if position == "right":
-            cv2.imshow('pupil', eye_frame_th)
+        if position == "left":
+            cv2.imwrite("images/04_eye_frame_medianBlur.png", eye_frame_th)
 
         contours, _ = cv2.findContours(eye_frame_th, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
@@ -322,259 +278,23 @@ class EyeTracker():
             if m['m00'] != 0:
                 pupil_center = (int(m['m10'] / m['m00']), int(m['m01'] / m['m00']))
 
-
+        # FOR BLOB DETECTION VERSION
 #        keypoints = self.blob_detector.detect(eye_frame_th)
 #        if len(keypoints) > 0:
 #            pupil_center = (int(keypoints[0].pt[0]), int(keypoints[0].pt[1]))
 #            pupil_radius = int(keypoints[0].size / 2)
 
-
         if position == "left":
+            if pupil_center != None and pupil_radius != None:
+                self.left_pupil_detected = True
             self.left_pupil = pupil_center
             self.left_pupil_radius = pupil_radius
 
         if position == "right":
+            if pupil_center != None and pupil_radius != None:
+                self.right_pupil_detected = True
             self.right_pupil = pupil_center
             self.right_pupil_radius = pupil_radius
-#            self.right_eye_frame = cv2.drawKeypoints(self.right_eye_frame, keypoints, self.right_eye_frame, (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-
-    def _extract_iris(self, position):
-        """
-        Extract from the eye frame the coordinates of the center of iris (x, y) 
-        w.r.t the eye frame and the iris radius in pixels 
-        """
-        self.left_iris_detected = False
-        self.right_iris_detected = False
-        iris_center = None
-        iris_radius = None
-
-        if position == "left":
-#            eye_frame_gray = cv2.cvtColor(self.left_eye_frame, cv2.COLOR_BGR2GRAY) 
-            eye_frame_gray = self.frame_gray[self.left_eye_bb[1]:self.left_eye_bb[1]+self.left_eye_bb[3], self.left_eye_bb[0]:self.left_eye_bb[0]+self.left_eye_bb[2]]
-
-        if position == "right":
-#            eye_frame_gray = cv2.cvtColor(self.right_eye_frame, cv2.COLOR_BGR2GRAY) 
-            eye_frame_gray = self.frame_gray[self.right_eye_bb[1]:self.right_eye_bb[1]+self.right_eye_bb[3], self.right_eye_bb[0]:self.right_eye_bb[0]+self.right_eye_bb[2]]
-        eye_frame_gray = cv2.GaussianBlur(eye_frame_gray, (7, 7), 0)
-#        eye_frame_gray = cv2.medianBlur(eye_frame_gray, 7)
-
-        eye_frame_gray = cv2.equalizeHist(eye_frame_gray)
-        cv2.imshow('eq', eye_frame_gray)
-
-        frame_height = np.size(eye_frame_gray, 0)
-        frame_width = np.size(eye_frame_gray, 1)
-
-        edged = cv2.Canny(eye_frame_gray, 100, 200) 
-        cv2.imshow('canny', edged)
-
-#        circles = cv2.HoughCircles(edged, cv2.HOUGH_GRADIENT, 1, 1,param1=100, param2=1, minRadius=1, maxRadius=20) 
-#        circles = cv2.HoughCircles(edged, cv2.HOUGH_GRADIENT, 1, int(frame_width/2), param1=200, param2=1, minRadius=5, maxRadius=int(frame_width/3)) 
-
-        circles = cv2.HoughCircles(edged, cv2.HOUGH_GRADIENT, 1, int(frame_width),param1=200, param2=1, minRadius=5, maxRadius=int(frame_width/4)) 
-#        circles = cv2.HoughCircles(eye_frame_gray, cv2.HOUGH_GRADIENT, 1, int(frame_width),param1=200, param2=1, minRadius=5, maxRadius=int(frame_width/4)) 
-
-#        print("Circles:", circles)
-
-        if circles is not None:
-            circles = np.uint16(np.around(circles))
-            c = circles[0][0]
-            iris_center = (c[0], c[1])
-            iris_radius = c[2]
-
-
-#        #draw circles debug
-#        if position == "right" and circles is not None:
-#
-#            for cir in circles[0]:
-#                print(cir)
-#                x , y = cir[0], cir[1]
-#                r = cir[2]
-#
-#                cv2.circle(self.right_eye_frame, (x, y), r, (0, 0, 255), 1)
-#            cv2.circle(self.right_eye_frame, iris_center, iris_radius, (0, 255, 0), 1)
-#            cv2.imshow('cirles',self.right_eye_frame)
-
-
-        if position == "left":
-            if iris_center != None and iris_radius != None:
-                self.left_iris_detected = True
-            self.left_iris = iris_center
-#            self.left_pupil = iris_center
-            self.left_iris_radius = iris_radius
-
-        if position == "right":
-            if iris_center != None and iris_radius != None:
-                self.right_iris_detected = True
-            self.right_iris = iris_center
-#            self.right_pupil = iris_center
-            self.right_iris_radius = iris_radius
-
-
-    def _extract_purkinje(self, position):
-        """
-        Extract from the eye frame the coordinates of the purkinje image (x, y) 
-        w.r.t the eye frame and the pupil radius in pixels 
-        """
-
-        purkinje = None
-
-        if position == "left":
-            iris_center = self.left_iris
-            iris_radius = self.left_iris_radius
-#            eye_frame_gray = cv2.cvtColor(self.left_eye_frame, cv2.COLOR_BGR2GRAY) 
-            eye_frame_gray = self.frame_gray[self.left_eye_bb[1]:self.left_eye_bb[1]+self.left_eye_bb[3], self.left_eye_bb[0]:self.left_eye_bb[0]+self.left_eye_bb[2]]
-#            print(self.left_iris_radius)
-#            print(self.left_iris)
-
-#            x = self.left_iris[0] - self.left_iris_radius
-#            y = self.left_iris[1] - self.left_iris_radius
-#            w = self.left_iris_radius * 2
-#            h = self.left_iris_radius * 2
-#            iris_frame_gray = eye_frame_gray[y:y+h, x:x+w]
-##            print(iris_frame_gray.shape)
-#            if iris_frame_gray.shape[0] == 0 or iris_frame_gray.shape[1] == 0:
-#                x = 0
-#                y = 0
-#                iris_frame_gray = eye_frame_gray
-#            cv2.imshow('iris left', iris_frame_gray)
-
-        if position == "right":
-            iris_center = self.right_iris
-            iris_radius = self.right_iris_radius
-#            eye_frame_gray = cv2.cvtColor(self.right_eye_frame, cv2.COLOR_BGR2GRAY) 
-            eye_frame_gray = self.frame_gray[self.right_eye_bb[1]:self.right_eye_bb[1]+self.right_eye_bb[3], self.right_eye_bb[0]:self.right_eye_bb[0]+self.right_eye_bb[2]]
-#            x = self.right_iris[0] - self.right_iris_radius
-#            y = self.right_iris[1] - self.right_iris_radius
-#            w = self.right_iris_radius * 2
-#            h = self.right_iris_radius * 2
-#            iris_frame_gray = eye_frame_gray[y:y+h, x:x+w]
-#            if iris_frame_gray.shape[0] == 0 or iris_frame_gray.shape[1] == 0:
-#                x = 0
-#                y = 0
-#                iris_frame_gray = eye_frame_gray
-#            cv2.imshow('iris right', iris_frame_gray)
-
-        x = iris_center[0] - iris_radius
-        y = iris_center[1] - iris_radius
-        w = iris_radius * 2
-        h = iris_radius * 2
-        iris_frame_gray = eye_frame_gray[y:y+h, x:x+w]
-        if iris_frame_gray.shape[0] == 0 or iris_frame_gray.shape[1] == 0:
-            x = 0
-            y = 0
-            iris_frame_gray = eye_frame_gray
-            if position == "left":
-                self.left_purkinje = purkinje
-
-            if position == "right":
-                self.right_purkinje = purkinje
-            return 
-        
-#        iris_frame_gray = cv2.equalizeHist(iris_frame_gray)
-
-        iris_frame_gray = cv2.GaussianBlur(iris_frame_gray, (7, 7), 0)
-        if position == 'right':
-            cv2.imshow('iris right', iris_frame_gray)
-
-#        # Iterative global thresholding
-#        th = 255
-#        count = 0
-#        founded = False
-#        while not founded and th > 127:
-#            _, th_global = cv2.threshold(iris_frame_gray, th, 255, cv2.THRESH_BINARY)
-#            count = np.count_nonzero(th_global)
-#            th-=1
-#            if count <= 0:
-#                continue
-#
-#            contours, _ = cv2.findContours(th_global, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-##            contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
-#            contours = sorted(contours, key=lambda x: cv2.contourArea(x))
-#            all_purkinjes = []
-#            for cnt in contours:
-##                cnt = cv2.convexHull(cnt)
-#                m = cv2.moments(cnt)
-#                if m['m00'] != 0:
-#                    purkinje = (x + int(m['m10'] / m['m00']), y + int(m['m01'] / m['m00']))
-#
-#                    square_dist = pow(purkinje[0] - iris_center[0], 2) + pow(purkinje[1] - iris_center[1], 2)
-#                    all_purkinjes.append([purkinje, square_dist])
-#            if all_purkinjes:
-#                all_purkinjes.sort(key=lambda x: x[1])
-#                for p in all_purkinjes:
-#                    purkinje = p[0]
-#                    if pow(purkinje[0] - iris_center[0], 2) + pow(purkinje[1] - iris_center[1], 2) < pow(iris_radius, 2):
-#                        founded = True
-#                        break
-#
-#
-#        if position == "right":
-#            cv2.imshow("th",th_global)
-
-
-
-        # Canny
-        edged = cv2.Canny(iris_frame_gray, 100, 200) 
-
-#        cv2.imshow("canny purk",edged)
-
-
-        num_labels, labels_image = cv2.connectedComponents(edged, connectivity=8)
-        frame_height = np.size(eye_frame_gray, 0)
-        frame_width = np.size(eye_frame_gray, 1)
-        distance = 100
-        for l in range(1,num_labels+1):
-            image = np.copy(edged)
-            image[labels_image == l] = 255
-            image[labels_image != l] = 0
-
-            contours, _ = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-#            contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-            contours = sorted(contours, key=lambda x: cv2.contourArea(x))
-            
-            for cnt in contours:
-
-                cnt = cv2.convexHull(cnt)
-                area = cv2.contourArea(cnt)
-
-                if area == 0 or area > 500:
-                    continue
-
-
-                circumference = cv2.arcLength(cnt, True)
-                circularity = circumference ** 2 / (4*math.pi*area)
-
-#                print("circularity image {} = {}".format(l,circularity))
-
-                if circularity < 0.3 and circularity > 1.7:
-                    continue
-
-                if abs(circularity - 1) < distance:
-                    purkinje = None
-#                    print("dist", abs(circularity -1))
-                    distance = abs(circularity - 1)
-                    m = cv2.moments(cnt)
-                    if m['m00'] != 0:
-                        purkinje = (x + int(m['m10'] / m['m00']), y + int(m['m01'] / m['m00']))
-
-#                    if position == "right":
-#                        x_b,y_b,w,h = cv2.boundingRect(cnt)
-#                        cv2.rectangle(self.right_eye_frame,(x+x_b,y+x_b),(x+x_b+w,y_b+y+h),(0,255,0),1)
-
-
-        if position == "right":
-            cv2.imshow('rect',self.right_eye_frame)
-
-
-#            cv2.imshow('image'+str(l), image)
-
-        if position == "left":
-            self.left_purkinje = purkinje
-
-        if position == "right":
-            self.right_purkinje = purkinje
-
 
 
     def _extract_looking_direction(self):

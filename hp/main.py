@@ -58,8 +58,6 @@ def nothing():
 
 def main():
     global mode
-    url = "http://192.168.1.2:8080" # Your url might be different, check the app
-#    camera = cv2.VideoCapture(url+"/video")
 
     camera = cv2.VideoCapture(0)
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
@@ -73,9 +71,11 @@ def main():
     screen.show()
 
     quiz = None
-    cv2.namedWindow("screen")
-    cv2.createTrackbar('threshold', 'screen', 0, 255, nothing)
-    cv2.setTrackbarPos('threshold', 'screen', 25)
+    cv2.namedWindow("frame")
+    cv2.createTrackbar('threshold', 'frame', 0, 255, nothing)
+    cv2.setTrackbarPos('threshold', 'frame', 25)
+
+    os.makedirs("./images", exist_ok=True)
 
     while True:
         print(mode)
@@ -90,7 +90,7 @@ def main():
         dec_frame = cv2.resize(dec_frame,(int(FRAME_WIDTH / 1.5), int(FRAME_HEIGHT / 1.5)))
 
         cv2.namedWindow("frame")
-        cv2.moveWindow("frame", int(RES_SCREEN[0] / 2 - FRAME_WIDTH / 3), screen.height + 100)
+        cv2.moveWindow("frame", int(RES_SCREEN[0] / 2 - FRAME_WIDTH / 3), screen.height + 75)
         cv2.imshow('frame', dec_frame)
 
 
