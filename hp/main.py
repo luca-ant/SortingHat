@@ -33,6 +33,9 @@ FRAME_HEIGHT = 720
 TIME_READING = 7
 TIME_ANSWERING = 5
 
+TIME_READING = 0.1
+TIME_ANSWERING = 0.1
+
 mode = Mode.BEGINNING
 
 def timeout_reading():
@@ -63,6 +66,7 @@ def main():
     screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     screen.clean()
+    screen.print_title()
     screen.print_instructions()
     screen.show()
 
@@ -92,6 +96,7 @@ def main():
         cv2.imshow('frame', dec_frame)
 
         screen.clean()
+        screen.print_title()
         screen.print_instructions()
 
         direction = eye_tracker.get_looking_direction()

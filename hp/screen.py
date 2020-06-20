@@ -23,6 +23,7 @@ class Screen:
         self.screen[:] = self.background_color
         self.current_answer = None
         self.print_instructions()
+        self.print_title()
 
     def clean_answers(self):
         cv2.rectangle(self.screen, (0,self.height // 3), (self.width, self.height), self.background_color, -1)
@@ -56,6 +57,32 @@ class Screen:
         self.screen = np.ones((self.height, self.width, 4), np.uint8)
         self.screen[:] = self.background_color
 
+        if os.path.isfile((os.path.join('resources', 'sorting_hat.png'))):
+            sh_image = cv2.imread(os.path.join('resources','sorting_hat.png'), cv2.IMREAD_UNCHANGED)
+
+            height, width, channels = sh_image.shape
+
+            ratio = (self.height/3) / height
+            sh_image = cv2.resize(sh_image, (int(width * ratio),int(height * ratio)))
+
+            height, width, channels = sh_image.shape
+            offset_x = self.width - width
+            offset_y = 0
+
+            background = self.screen[offset_y:offset_y + height, offset_x:offset_x + width, :]
+            foreground = sh_image
+
+            # normalize alpha channels from 0-255 to 0-1
+            alpha_background = background[:,:,3] / 255.0
+            alpha_foreground = foreground[:,:,3] / 255.0
+
+            # set adjusted colors
+            for color in range(0, 3):
+                background[:,:,color] = alpha_foreground * foreground[:,:,color] + alpha_background * background[:,:,color] * (1 - alpha_foreground)
+
+            # set adjusted alpha and denormalize back to 0-255
+            background[:,:,3] = (1 - (1 - alpha_foreground) * (1 - alpha_background)) * 255
+
 
     def print_answers(self):
 
@@ -84,10 +111,10 @@ class Screen:
 
     def print_question(self, question):
         font = cv2.FONT_HERSHEY_SIMPLEX
-        fs = 1
-        th = 2
+        fs = 1.2
+        th = 3
 
-        y0, dy = int(0.15 * self.height), 30
+        y0, dy = int(0.15 * self.height), 35
 
         for i, line in enumerate(question.split('\n')):
             textsize = cv2.getTextSize(line, font, fs, th)[0]
@@ -95,13 +122,24 @@ class Screen:
             y = y0 + i*dy
             cv2.putText(img=self.screen, text=line, org=(x, y),fontFace=font, fontScale=fs, color=(0,0,0), thickness=th)
 
+    def print_title(self):
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        fs = 1.7
+        th = 5
+        line = 'HI, I\'M THE SORTING HAT'
+        textsize = cv2.getTextSize(line, font, fs, th)[0]
+        x = self.width // 4 + (self.width // 2 - textsize[0]) // 2
+        y = int(0.1 * self.height) + textsize[1]
+        cv2.putText(img=self.screen, text=line, org=(x, y),fontFace=font, fontScale=fs, color=(0,0,0), thickness=th)
+
 
     def print_instructions(self):
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        fs = 0.7
+        fs = 0.8
         th = 2
-        x, y0, dy = int(0.03 * self.width), int(0.07 * self.height), 25
+        x, y0, dy = int(0.02 * self.width), int(0.09 * self.height), 25
 
         instructions = "Press:\nESC to quit\ns to start quiz\nn to next question"
 
@@ -111,26 +149,25 @@ class Screen:
 
     def show_result(self, result):
         font = cv2.FONT_HERSHEY_SIMPLEX
-        fs = 1
-        th = 2
-        line = 'You are assigned to...'
+        fs = 1.5
+        th = 3
+        line = 'The Sorting Hat says...'
         textsize = cv2.getTextSize(line, font, fs, th)[0]
         x = self.width // 4 + (self.width // 2 - textsize[0]) // 2
         y = int(0.15 * self.height) + textsize[1]
         cv2.putText(img=self.screen, text=line, org=(x, y),fontFace=font, fontScale=fs, color=(0,0,0), thickness=th)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        fs = 2
-        th = 3
+        fs = 2.5
+        th = 5
         line = result.upper()
         textsize = cv2.getTextSize(line, font, fs, th)[0]
         x = (self.width - textsize[0]) // 2
-        y = int(0.9 * self.height) - textsize[1]
+        y = int(0.85 * self.height) - textsize[1]
         cv2.putText(img=self.screen, text=line, org=(x, y),fontFace=font, fontScale=fs, color=(0,0,0), thickness=th)
 
-        if os.path.isfile((os.path.join('houses', result.lower()+'.png'))):
-            house_image = cv2.imread(os.path.join('houses',result.lower()+'.png'), cv2.IMREAD_UNCHANGED)
-            print(house_image.shape)
+        if os.path.isfile((os.path.join('resources', result.lower()+'.png'))):
+            house_image = cv2.imread(os.path.join('resources',result.lower()+'.png'), cv2.IMREAD_UNCHANGED)
 
             height, width, channels = house_image.shape
 
@@ -141,6 +178,7 @@ class Screen:
             offset_x = self.width - width
             offset_y = 0
 
+            self.screen[offset_y:offset_y + height, offset_x:offset_x + width, :] = self.background_color
             background = self.screen[offset_y:offset_y + height, offset_x:offset_x + width, :]
             foreground = house_image
 
