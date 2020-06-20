@@ -2,16 +2,24 @@ import os
 import cv2
 import math
 import numpy as np
-#import matplotlib.pyplot as plt
 from model import Eye
 
 class EyeTracker():
     """
     EyeTracker implementation based on threshold using OpenCV
     Attributes:
-        frame: the current frame in numpy format
+        face_cascade: opencv face classifier
+        eye_cascade: opencv eye classifier
+        frame: current frame in numpy format
+        frame_gray: current frame in gray scale in numpy format
+        looking_direction: current looking direction as string (left or right)
 
     Methods:
+        update: update the frame with the one just captured from camera and analize it
+        decorate_frame: highlighs and draws the features extracted from face on the frme and return a copy of it
+        left_eye: return an object for the left eye with the extracted features
+        right_eye: return an object for the right eye with the extracted features
+        get_looking_direction: return the current looking direction as string
 
     """
     def __init__(self):
@@ -49,7 +57,6 @@ class EyeTracker():
 
         self.left_eye_detected = False
         self.right_eye_detected = False
-
         self.face_bb = None
         self.left_eye_bb = None
         self.right_eye_bb = None
@@ -70,8 +77,6 @@ class EyeTracker():
 
     def _analyze(self):
         self.frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
-#        self.frame_gray = cv2.GaussianBlur(self.frame_gray, (7, 7), 0)
-#        self.frame_gray = cv2.equalizeHist(self.frame_gray)
 
         self._extract_face()
         self._extract_eyes()
@@ -298,6 +303,10 @@ class EyeTracker():
 
 
     def _extract_looking_direction(self):
+        """
+        Extract the looking direction from the current extracted features
+        """
+
         direction = None
         directionR = None
         directionL = None

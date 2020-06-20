@@ -1,4 +1,5 @@
 class Eye:
+
     """
     Model class for an eye
     Attributes:
@@ -7,6 +8,7 @@ class Eye:
         pupil_center: a tuple (x, y) with the coordinates of the center of the pupil w.r.t the eye ROI image
         pupil_radius: radius of the pupil in pixels
     """
+
     def __init__(self, frame, position, pupil_center, pupil_radius):
         self.frame = frame
         self.position = position

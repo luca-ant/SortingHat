@@ -33,10 +33,6 @@ FRAME_HEIGHT = 720
 TIME_READING = 7
 TIME_ANSWERING = 5
 
-
-#TIME_READING = 0.5
-#TIME_ANSWERING = 0.5
-
 mode = Mode.BEGINNING
 
 def timeout_reading():
@@ -52,7 +48,7 @@ def timeout_answering():
     return
 
 
-def nothing():
+def nothing(val):
     pass
 
 
@@ -81,9 +77,11 @@ def main():
         print(mode)
 
         _, frame = camera.read() 
+
         start = time.time()
         eye_tracker.update(frame)
         end = time.time()
+
         print("TIME: {:.3f} ms".format(end*1000 - start*1000))
 
         dec_frame = eye_tracker.decorate_frame()
@@ -93,19 +91,18 @@ def main():
         cv2.moveWindow("frame", int(RES_SCREEN[0] / 2 - FRAME_WIDTH / 3), screen.height + 75)
         cv2.imshow('frame', dec_frame)
 
-
         screen.clean()
-        screen.update_frame(dec_frame)
         screen.print_instructions()
 
         direction = eye_tracker.get_looking_direction()
         print("DIRECTION: {}".format(direction))
 
         if direction:
-            screen.update(direction)
+            screen.update_direction(direction)
             screen.color_answers()
         else:
             screen.clean_answers()
+
         screen.show()
 
         if mode == Mode.READING:
@@ -124,7 +121,7 @@ def main():
             print("DIRECTION: {}".format(direction))
 
             if direction:
-                screen.update(direction)
+                screen.update_direction(direction)
                 screen.color_answers()
                 if direction == 'left':
                     quiz.add_answer(id_q, 'yes')
@@ -142,13 +139,11 @@ def main():
             screen.confirm_answer(answer)
             screen.show()
 
-
         if mode == Mode.COMPLETED:
             result = quiz.compute_result()
             screen.clean()
             screen.print_instructions()
             screen.show_result(result)
-
 
         k = cv2.waitKey(1) & 0xff
 
@@ -172,11 +167,9 @@ def main():
                 timer_reading = Timer(TIME_READING, timeout_reading)
                 timer_reading.start()
 
-
     camera.release()
     cv2.destroyAllWindows()
     os._exit(0)
-
 
 if __name__ == '__main__':
     main()

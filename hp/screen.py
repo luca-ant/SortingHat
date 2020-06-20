@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import cv2
 import pyautogui
 
@@ -6,27 +7,29 @@ RES_SCREEN = pyautogui.size() # RES_SCREEN[0] -> width
                               # RES_SCREEN[1] -> heigth
 class Screen:
     """
-    Class for a fake screen
+    Class for a screen
     Attributes:
+        screen: numpy array representing the screen view
+        background_color: the background color of the screen
         width: screen width in pixels
         height: screnn height in pixels
-        pointer: coordinates (x, y) of pointer position in pixels
-    Methods:
+        current_answer: current selected answer between 'yes' or 'no'
     """
     def __init__(self, width=1280, height=720):
         self.width = width
         self.height = height
+        self.background_color = (200,225,240, 255)
+        self.screen = np.ones((self.height, self.width, 4), np.uint8)
+        self.screen[:] = self.background_color
         self.current_answer = None
-        self.screen = np.ones((self.height, self.width, 3))
         self.print_instructions()
-        self.frame = np.zeros((720, self.width, 3))
 
     def clean_answers(self):
-        cv2.rectangle(self.screen, (0,self.height // 3), (self.width, self.height), (255,255,255), -1)
+        cv2.rectangle(self.screen, (0,self.height // 3), (self.width, self.height), self.background_color, -1)
         self.print_answers()
 
     def color_answers(self):
-        cv2.rectangle(self.screen, (0,self.height // 3), (self.width, self.height), (255,255,255), -1)
+        cv2.rectangle(self.screen, (0,self.height // 3), (self.width, self.height), self.background_color, -1)
         if self.current_answer == 'yes':
             cv2.rectangle(self.screen, (0, self.height // 3), (self.width // 2, self.height), (0,0,255), -1)
 
@@ -35,7 +38,7 @@ class Screen:
         self.print_answers()
 
     def confirm_answer(self, answer):
-        cv2.rectangle(self.screen, (0,self.height // 3), (self.width, self.height), (255,255,255), -1)
+        cv2.rectangle(self.screen, (0,self.height // 3), (self.width, self.height), self.background_color, -1)
         if answer == 'yes':
             cv2.rectangle(self.screen, (0, self.height // 3), (self.width // 2, self.height), (0,255,0), -1)
 
@@ -43,17 +46,15 @@ class Screen:
             cv2.rectangle(self.screen, (self.width // 2, self.height // 3), (self.width, self.height), (0,255,0), -1)
         self.print_answers()
 
-    def update_frame(self, frame):
-        self.frame = frame
-
-    def update(self, direction):
+    def update_direction(self, direction):
         if direction == 'left':
             self.current_answer = 'yes'
         if direction == 'right':
             self.current_answer = 'no'
 
     def clean(self):
-        self.screen = np.ones((self.height, self.width, 3))
+        self.screen = np.ones((self.height, self.width, 4), np.uint8)
+        self.screen[:] = self.background_color
 
 
     def print_answers(self):
@@ -86,7 +87,7 @@ class Screen:
         fs = 1
         th = 2
 
-        y0, dy = int(0.1 * self.height), 30
+        y0, dy = int(0.15 * self.height), 30
 
         for i, line in enumerate(question.split('\n')):
             textsize = cv2.getTextSize(line, font, fs, th)[0]
@@ -115,7 +116,7 @@ class Screen:
         line = 'You are assigned to...'
         textsize = cv2.getTextSize(line, font, fs, th)[0]
         x = self.width // 4 + (self.width // 2 - textsize[0]) // 2
-        y = int(0.1 * self.height) + textsize[1]
+        y = int(0.15 * self.height) + textsize[1]
         cv2.putText(img=self.screen, text=line, org=(x, y),fontFace=font, fontScale=fs, color=(0,0,0), thickness=th)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -126,6 +127,35 @@ class Screen:
         x = (self.width - textsize[0]) // 2
         y = int(0.9 * self.height) - textsize[1]
         cv2.putText(img=self.screen, text=line, org=(x, y),fontFace=font, fontScale=fs, color=(0,0,0), thickness=th)
+
+        if os.path.isfile((os.path.join('houses', result.lower()+'.png'))):
+            house_image = cv2.imread(os.path.join('houses',result.lower()+'.png'), cv2.IMREAD_UNCHANGED)
+            print(house_image.shape)
+
+            height, width, channels = house_image.shape
+
+            ratio = self.height / height
+            house_image = cv2.resize(house_image, (int(width * ratio),int(height * ratio)))
+
+            height, width, channels = house_image.shape
+            offset_x = self.width - width
+            offset_y = 0
+
+            background = self.screen[offset_y:offset_y + height, offset_x:offset_x + width, :]
+            foreground = house_image
+
+            # normalize alpha channels from 0-255 to 0-1
+            alpha_background = background[:,:,3] / 255.0
+            alpha_foreground = foreground[:,:,3] / 255.0
+
+            # set adjusted colors
+            for color in range(0, 3):
+                background[:,:,color] = alpha_foreground * foreground[:,:,color] + alpha_background * background[:,:,color] * (1 - alpha_foreground)
+
+            # set adjusted alpha and denormalize back to 0-255
+            background[:,:,3] = (1 - (1 - alpha_foreground) * (1 - alpha_background)) * 255
+
+
         self.show()
 
     def show(self):

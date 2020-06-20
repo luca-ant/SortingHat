@@ -6,10 +6,9 @@ class Quiz:
     """
     Class for quiz data
     Attributes:
-        width: screen width in pixels
-        height: screnn height in pixels
-        pointer: coordinates (x, y) of pointer position in pixels
-    Methods:
+        questions: a dictionary contains all questions (id: string)
+        answers: a dictionary contains all the user answers (id: list of answers)
+        results: a dictionary contains the final computed result of the quiz (string: score)
     """
     def __init__(self):
         self.questions = {}
