@@ -76,7 +76,7 @@ class Quiz:
         num_yes = answers.count('yes') 
         num_no = answers.count('no') 
 
-        if num_yes > num_no:
+        if num_yes >= num_no:
             return 'yes'
         elif num_yes < num_no:
             return 'no'
