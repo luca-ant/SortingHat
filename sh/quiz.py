@@ -35,7 +35,7 @@ class Quiz:
                   9 : "Would you have a pet\nwhile at Hogwarts?",                # Y>T N>S
 
                  10 : "Is Moaning Myrtle annoying?",                             # Y>S N>C
-                 11 : "Would you ever call someone Half-blood?",                 # Y>S N>T
+                 11 : "Would you ever call\nsomeone Half-blood?",                 # Y>S N>T
                  12 : "Whould you want to have\nthe Elder Wand?",                # Y>S N>G
 
             }
@@ -69,7 +69,6 @@ class Quiz:
     def add_answer(self, id_q, answer):
         self.answers[id_q] = self.answers.get(id_q, list())
         self.answers[id_q].append(answer)
-        print(self.answers)
 
     def get_answer(self, id_q):
         answers = self.answers.get(id_q, list())
