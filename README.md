@@ -5,7 +5,7 @@
 </p>
 The <b>Sorting Hat</b> is a sentient hat at Hogwarts that magically determines which of the four school Houses each new student belongs most to. In this <b>Python</b> version based on <b>OpenCV</b> you should answer to some question using eyes, looking left or right.
 
-## Demonstration
+## Demo
 
 <p align="center">
   <img width=1024px src="https://github.com/luca-ant/SortingHat/blob/master/videos/sorting_hat.gif">
