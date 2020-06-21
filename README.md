@@ -5,6 +5,7 @@
 </p>
 Sorting Hat is the magic hat of Harry Potter saga which determines which of the four school Houses each new student belongs most to. In this <b>Python</b> version based on <b>OpenCV</b> you should answer to some question using eyes, looking left or right.
 <br />
+<br />
 <p align="center">
   <img width=1024px src="https://github.com/luca-ant/SortingHat/blob/master/videos/sorting_hat.gif">
 </p>
