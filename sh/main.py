@@ -72,7 +72,7 @@ def main():
     cv2.createTrackbar('threshold', 'frame', 0, 255, nothing)
     cv2.setTrackbarPos('threshold', 'frame', 25)
 
-    os.makedirs("./images", exist_ok=True)
+##    os.makedirs("./images", exist_ok=True)
 
     while True:
         print(mode)
