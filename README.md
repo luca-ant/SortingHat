@@ -19,6 +19,7 @@ git clone https://github.com/luca-ant/SortingHat.git
 ```
 
 * Install dependencies
+
 ```
 sudo apt install python3-setuptools python3-pip python3-venv
 ```
@@ -28,6 +29,7 @@ sudo pacman -S python-setuptools python-pip python-virtualenv
 ```
 
 * Create a virtual environment and install requirements modules
+
 ```
 cd SortingHat
 python3 -m venv venv
