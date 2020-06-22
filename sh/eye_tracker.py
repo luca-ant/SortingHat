@@ -262,10 +262,9 @@ class EyeTracker():
 ##            cv2.imwrite("images/04_eye_frame_medianBlur.png", eye_frame_th)
 
         contours, _ = cv2.findContours(eye_frame_th, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
+        contours = sorted(contours, key=lambda x: cv2.contourArea(x))
 
         for cnt in contours:
-
             cnt = cv2.convexHull(cnt)
             area = cv2.contourArea(cnt)
             circumference = cv2.arcLength(cnt, True)
@@ -282,6 +281,7 @@ class EyeTracker():
             m = cv2.moments(cnt)
             if m['m00'] != 0:
                 pupil_center = (int(m['m10'] / m['m00']), int(m['m01'] / m['m00']))
+                break
 
         # FOR BLOB DETECTION VERSION
 #        keypoints = self.blob_detector.detect(eye_frame_th)
