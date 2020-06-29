@@ -242,24 +242,21 @@ class EyeTracker():
 ##        if position == "left":
 ##            cv2.imwrite("images/01_eye_frame_equalized.png", eye_frame_gray)
 
-        eye_frame_gray = cv2.erode(eye_frame_gray, None, iterations=2)
-        eye_frame_gray = cv2.dilate(eye_frame_gray, None, iterations=4)
-
-##        if position == "left":
-##            cv2.imwrite("images/02_eye_frame_er-dil.png", eye_frame_gray)
-
 #        threshold = 25
         threshold = cv2.getTrackbarPos('threshold', 'frame')
 
         _, eye_frame_th = cv2.threshold(eye_frame_gray, threshold, 255, cv2.THRESH_BINARY)
 
+        eye_frame_th = cv2.erode(eye_frame_th, None, iterations=2)
+        eye_frame_th = cv2.dilate(eye_frame_th, None, iterations=4)
+
 ##        if position == "left":
-##            cv2.imwrite("images/03_eye_frame_threshold.png", eye_frame_th)
+##            cv2.imwrite("images/02_eye_frame_threshold.png", eye_frame_th)
 
         eye_frame_th = cv2.medianBlur(eye_frame_th, 7)
 
 ##        if position == "left":
-##            cv2.imwrite("images/04_eye_frame_medianBlur.png", eye_frame_th)
+##            cv2.imwrite("images/03_eye_frame_medianBlur.png", eye_frame_th)
 
         contours, _ = cv2.findContours(eye_frame_th, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=lambda x: cv2.contourArea(x))
@@ -267,9 +264,10 @@ class EyeTracker():
         for cnt in contours:
             cnt = cv2.convexHull(cnt)
             area = cv2.contourArea(cnt)
+            if area == 0:
+                continue
             circumference = cv2.arcLength(cnt, True)
             circularity = circumference ** 2 / (4*math.pi*area)
-
 #            if circularity < 0.5 and circularity > 1.5:
 #                continue
 
