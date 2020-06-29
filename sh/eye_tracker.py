@@ -264,7 +264,7 @@ class EyeTracker():
         for cnt in contours:
             cnt = cv2.convexHull(cnt)
             area = cv2.contourArea(cnt)
-            if area == 0:
+            if area < 10:
                 continue
             circumference = cv2.arcLength(cnt, True)
             circularity = circumference ** 2 / (4*math.pi*area)
