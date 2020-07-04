@@ -151,6 +151,8 @@ class EyeTracker():
         Extract the box of the face ROI image as opencv format (x, y, w, h) from the current frame
         """
         frame_gray = cv2.GaussianBlur(self.frame_gray, (7, 7), 0)
+#        frame_gray = cv2.medianBlur(frame_gray, 7)
+
         faces = self.face_cascade.detectMultiScale(frame_gray, 1.3, 5) 
 #        faces = self.face_cascade.detectMultiScale(frame_gray) 
 
@@ -186,9 +188,10 @@ class EyeTracker():
 
         face_frame_gray = self.frame_gray[y:y+h, x:x+w] 
         face_frame_gray = cv2.GaussianBlur(face_frame_gray, (7, 7), 0)
+#        face_frame_gray = cv2.medianBlur(face_frame_gray, 7)
 
-#        eyes = self.eye_cascade.detectMultiScale(face_frame_gray) 
         eyes = self.eye_cascade.detectMultiScale(face_frame_gray, 1.3, 5) 
+#        eyes = self.eye_cascade.detectMultiScale(face_frame_gray) 
 
         for (ex, ey, ew, eh) in eyes:
             # do not consider false eyes detected at the bottom of the face
