@@ -153,8 +153,8 @@ class EyeTracker():
         frame_gray = cv2.GaussianBlur(self.frame_gray, (7, 7), 0)
 #        frame_gray = cv2.medianBlur(frame_gray, 7)
 
-        faces = self.face_cascade.detectMultiScale(frame_gray, 1.3, 5) 
 #        faces = self.face_cascade.detectMultiScale(frame_gray) 
+        faces = self.face_cascade.detectMultiScale(frame_gray, 1.3, 5) 
 
         # detect the best face on the image based on ROI size
         if len(faces) > 1:
@@ -190,8 +190,8 @@ class EyeTracker():
         face_frame_gray = cv2.GaussianBlur(face_frame_gray, (7, 7), 0)
 #        face_frame_gray = cv2.medianBlur(face_frame_gray, 7)
 
-        eyes = self.eye_cascade.detectMultiScale(face_frame_gray, 1.3, 5) 
 #        eyes = self.eye_cascade.detectMultiScale(face_frame_gray) 
+        eyes = self.eye_cascade.detectMultiScale(face_frame_gray, 1.3, 5) 
 
         for (ex, ey, ew, eh) in eyes:
             # do not consider false eyes detected at the bottom of the face
