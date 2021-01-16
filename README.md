@@ -28,7 +28,7 @@ or
 sudo pacman -S python-setuptools python-pip python-virtualenv
 ```
 
-* Create a virtual environment and install requirements modules
+* Create a virtual environment and install requirement modules
 
 ```
 cd SortingHat
